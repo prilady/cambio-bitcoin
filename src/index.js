@@ -4,20 +4,44 @@ import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
-  useQuery,
-  gql
+  gql,
+  useQuery
 } from "@apollo/client";
 
 const client = new ApolloClient({
-  uri: 'https://48p1r2roz4.sse.codesandbox.io',
+  uri: "https://t9xt21.sse.codesandbox.io/graphql",
   cache: new InMemoryCache()
 });
 
-const EXCHANGE_RATES = gql`
-  query GetExchangeRates {
-    rates(currency: "USD") {
-      currency
-      rate
+client
+  .query({
+    query: gql`
+    query BitcoinValue {
+      bitcoinValue {
+        time {
+            updated
+        }
+        bpi {
+            USD {
+                rate
+            }
+        }
+      }
+    }
+    `
+  }).then(result => console.log(result));
+
+  const EXCHANGE_RATES = gql`
+  query BitcoinValue {
+    bitcoinValue {
+      time {
+          updated
+      }
+      bpi {
+          USD {
+              rate
+          }
+      }
     }
   }
 `;
@@ -28,27 +52,28 @@ function ExchangeRates() {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
 
-  return data.rates.map(({ currency, rate }) => (
-    <div key={currency}>
-      <p>
-        {currency}: {rate}
-      </p>
-    </div>
-  ));
-}
-
-function App() {
   return (
     <div>
-      <h2>My first Apollo app 🚀</h2>
-      <ExchangeRates />
+      <p>
+        {data.bitcoinValue.bpi.USD.rate} - {data.bitcoinValue.time.updated}
+      </p>
     </div>
   );
+  
 }
 
-render(
-  <ApolloProvider client={client}>
-    <App />
-  </ApolloProvider>,
-  document.getElementById("root")
-);
+  function App() {
+    return (
+      <div>
+        <h2>Bitcoin USD rate and time: 🚀</h2>
+         <ExchangeRates /> 
+      </div>
+    );
+  }
+  
+  render(
+    <ApolloProvider client={client}>
+      <App />
+    </ApolloProvider>,
+    document.getElementById('root'),
+  );
